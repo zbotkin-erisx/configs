@@ -1,0 +1,893 @@
+export JRUBY_OPTS="-X-C -J-client -J-XX:+TieredCompilation -J-XX:TieredStopAtLevel=1 -Xcompile.invokedynamic=false --debug"
+
+PATH="$HOME/bin:$PATH"
+PROJECTS_DIR="$HOME/projects"
+PERSONAL_PROJECTS_DIR="$HOME/PersonalProjects"
+MONGO_SCRIPT_DIR="$HOME/MongoScripts"
+NOTES_DIR="$HOME/Notes"
+JOURNAL_DIR="$HOME/Notes/journal"
+VPN_DIR="$HOME/vpn"
+ISSUES_DIR="$HOME/Issues"
+BOILERPLATE_DIR="$HOME/BoilerplateStuff"
+TEST_CORE_FILES_DIR="$HOME/tmp/ftp/core"
+WALLET_DIR="$HOME/Electron-Cash-4.2.3"
+GOALS_DIR="$HOME/2021Goals"
+
+AMAZON_LIB_LINK="https://read.amazon.com/"
+EMAIL_LINK="https://mail.google.com/mail"
+CALENDAR_LINK="https://calendar.google.com/calendar"
+GITHUB_LINK="https://github.com/ErisExchange"
+JIRA_LINK="https://erisdigital.atlassian.net"
+MARGIN_EXAMPLES_LINK="https://docs.google.com/spreadsheets/d/12yQ48N4h4TL2Q_Dk5fh4U5cXGU1iSGVdBxMDd9ZRi5E/edit"
+MONOREPO_LINK="git@github.com:ErisExchange/eris_tcs.git"
+SPRINT_LINK="https://erisdigital.atlassian.net/secure/RapidBoard.jspa?rapidView=86&projectKey=CO"
+STANDUP_NOTES_LINK="https://docs.google.com/document/d/1Dh8jLhSfk-cc4bASR8-90lQu4-C4EjGLhGb-3mSkIuA/edit#heading=h.butnv2blwar7"
+STANDUP_MEETING_LINK="https://meet.google.com/mxj-shyr-brz?authuser=0"
+RELEASE_SCHED_LINK="https://docs.google.com/spreadsheets/d/1ngmRvkUe96jYVZNtOAQyDPP4FObsUqLLinr2x8phbQo/edit#gid=1090788641"
+
+TREE_FIDDY="https://docs.google.com/spreadsheets/d/1tCojmK_GmMMSdfUncmKzuzIOqP32AcL1HrJwi-HB5eo/edit#gid=0"
+
+JUMPCLOUD="http://console.jumpcloud.com/"
+DATADOG_PROD="https://app.datadoghq.com/apm/home?env=prd"
+DATADOG_NRL="https://app.datadoghq.com/apm/home?env=nrl"
+DATADOG_TEST="https://app.datadoghq.com/apm/home?env=tst"
+DATADOG_DEV="https://app.datadoghq.com/apm/home?env=dev"
+JENKINS_LINK="http://dev-va-jenkins-a1.erisx:8080"
+
+#alias browser-shortcut='google-chrome'
+alias browser-shortcut='firefox'
+alias bex="bundle exec"
+alias bexr="bundle exec rspec"
+alias gitd='git diff'
+alias gitl='git log'
+alias gits='git status'
+
+
+## mispellings
+alias celar="clear"
+alias ckear="clear"
+alias clar="clear"
+alias cear="clear"
+alias lear="clear"
+alias re-soruce="re-source"
+alias re-souce="re-source"
+alias sl="ls"
+alias porjects="projects"
+alias p="projects"
+alias pp="personal-projects"
+alias guts='gits'
+alias gtis='gits'
+
+function dev-vpn() {
+  sudo openvpn --config $VPN_DIR/dev.ovpn
+}
+function test-vpn() {
+  #sudo openvpn --config "$VPN_DIR/test.ovpn"
+  sudo openvpn --config "$VPN_DIR/test-ohio.ovpn"
+}
+function nr-vpn() {
+  sudo openvpn --config $VPN_DIR/nr.ovpn
+}
+function prod-vpn() {
+  sudo openvpn --config $VPN_DIR/prod.ovpn
+}
+function marketops-vpn() {
+  sudo openvpn --config $VPN_DIR/marketops.ovpn
+}
+
+function journal() {
+  if [[ -z $1 ]]
+  then
+    currentDate=`date +"%Y%m%d"`
+    currentFile="$JOURNAL_DIR/$currentDate.txt"
+    touch $currentFile
+    vim $currentFile
+  else
+    filename="$NOTES_DIR/$1.txt"
+    if [ -f "$filename" ]; then
+      vim $filename
+    else
+      echo "no such file \"$filename\""
+    fi
+  fi
+}
+
+function note() {
+  if [[ -z $1 ]]
+  then
+    currentDate=`date +"%Y%m%d"`
+    currentFile="$NOTES_DIR/$currentDate.txt"
+    touch $currentFile
+    vim $currentFile
+  else
+    filename="$NOTES_DIR/$1.txt"
+    if [ -f "$filename" ]; then
+      vim $filename
+    else
+      echo "no such file \"$filename\""
+    fi
+  fi
+}
+
+function notes() {
+  if [ -z $1 ]; then
+    note
+  else
+    note $1
+  fi
+}
+
+function start-all() {
+  ~/bin/mongo-start
+  ~/bin/rabbit-start
+  ~/bin/postgres-start
+}
+
+function stop-all() {
+  ~/bin/mongo-stop
+  ~/bin/rabbit-stop
+  ~/bin/postgres-stop
+}
+
+function source-all-envs() {
+  if [[ -z "$1" ]]
+  then
+    source-all-envs-dev
+  elif [[ "$1" == "dev" ]]
+  then
+    source-all-envs-dev
+  elif [[ "$1" == "test" || "$1" == "tst" ]]
+  then
+    source-all-envs-tst
+  elif [[ "$1" == "nr" || "$1" == "nrl" ]]
+  then
+    source-all-envs-nrl
+  else
+    echo "$1" env not found
+  fi
+}
+function unsource-all-envs() {
+  if [[ -z "$1" ]]
+  then
+    unsource-all-envs-dev
+  elif [[ "$1" == "dev" ]]
+  then
+    unsource-all-envs-dev
+  elif [[ "$1" == "test" || "$1" == "tst" ]]
+  then
+    unsource-all-envs-tst
+  elif [[ "$1" == "nr" || "$1" == "nrl" ]]
+  then
+    unsource-all-envs-nrl
+  else
+    echo "$1" env not found
+  fi
+}
+
+function source-local-postgres() {
+  DISABLE_RISK_POSTGRES="false" \
+  POSTGRES_USER="postgres" \
+  POSTGRES_PASSWORD="local" \
+  POSTGRES_HOST="localhost"
+}
+
+function source-all-envs-dev() {
+  . ~/bin/env-auth0-dev-test
+  . ~/bin/env-ftp-local
+  . ~/bin/env-mongo-dev
+}
+function source-all-envs-tst() {
+  . ~/bin/env-auth0-dev-test
+  . ~/bin/env-ftp-local
+  . ~/bin/env-mongo-test
+  . ~/bin/env-postgres-test
+}
+function source-all-envs-nrl() {
+  . ~/bin/env-auth0-dev-test
+  . ~/bin/env-ftp-local
+  . ~/bin/env-mongo-nrl
+}
+function unsource-all-envs() {
+  . ~/bin/unenv-auth0
+  . ~/bin/unenv-ftp
+  . ~/bin/unenv-mongo
+  . ~/bin/unenv-postgres-test
+}
+
+function rabbit-dev() {
+  RABBIT_HOST=dev-va-rabbitmq-a1.erisx
+}
+
+function mongo-dev() {
+  if [[ -z $1 ]]
+  then
+    mongo --host dev-va-mongodb-a1.erisx:27017 \
+    --username dev_svc \
+    --password zakishoodieman \
+    --authenticationDatabase admin
+  else
+    if [[ -f "$1" ]]
+    then
+      mongo --host dev-va-mongodb-a1.erisx:27017 \
+      --username dev_svc \
+      --password zakishoodieman \
+      --authenticationDatabase admin < "$1"
+    else
+      echo "Query file $1 does not exist!"
+    fi
+  fi
+}
+
+## pretty sure this no longer works
+function build-models() {
+  REPO_NAME=
+  while [ "$1" != "" ]
+  do
+    case $1 in
+      -r | --repo)
+      REPO_NAME="$2"
+      shift
+      shift
+      ;;
+    esac
+  done
+  REPO_DIR="$PROJECTS_DIR/$REPO_NAME"
+  if [[ $REPO_NAME == "" ]]
+  then
+    echo "Need a repo"
+  elif [[ ! -d $REPO_DIR ]]
+  then
+    echo "$REPO_DIR does not exist. Create it with mono-repo"
+  else
+    cd "$REPO_DIR/Common.rb/eris_models_core/ext/java/"
+    rake
+    cd "$REPO_DIR/Common.rb"
+    for i in `find . -maxdepth 2 -name ext`
+    do
+      echo "Building native extensions for ${i}..."
+      (cd $i/*; rake)
+    done
+  fi
+}
+
+# copy-ticket 65.0 65.1
+function copy-tickets() {
+  git fetch --all --tags --prune;
+  git log 0.$1...0.$2 | rg -o "((TUI|CO|TME|IO|RSK)-\d+)" -r '$1' | awk '{print "https://erisdigital.atlassian.net/browse/"toupper($0)}' | sort -V | uniq | xclip -selection clipboard
+}
+
+# copy-git-log 65.0 65.1
+function copy-git-log() {
+  git log --oneline --no-decorate 0.$1...0.$2 | xclip -selection clipboard
+}
+
+function run-statement-generator() {
+
+  REPO_NAME=
+  INSTALL="no"
+  TASK_NAME="generate_statements"
+  TASK_DATE="2020-11-16"
+  USE_LOCAL="no"
+  while [ "$1" != "" ]
+  do
+    case $1 in
+      -r | --repo)
+      REPO_NAME="$2"
+      shift
+      shift
+      ;;
+      -i | --install)
+      INSTALL="yes"
+      shift
+      ;;
+      -t | --task)
+      TASK_NAME="$2"
+      shift
+      shift
+      ;;
+      -d | --date)
+      TASK_DATE="$2"
+      shift
+      shift
+      ;;
+      -l | --local)
+      USE_LOCAL="yes"
+      shift
+      ;;
+    esac
+  done
+
+  if [[ $USE_LOCAL == "yes" ]]
+  then
+    . ~/bin/env-ftp-local
+  else
+    . ~/bin/unenv-ftp
+  fi
+
+  REPO_DIR="$PROJECTS_DIR/$REPO_NAME"
+  if [[ $REPO_NAME == "" ]]
+  then
+    echo "Need a repo to run"
+  elif [[ ! -d "$REPO_DIR" ]]
+  then
+    echo "$REPO_DIR does not exist. Create it with mono-repo"
+  else
+    cd "$REPO_DIR/StatementGenerator"
+    if [[ $INSTALL == "yes" ]]
+    then
+      bundle install
+    fi
+    if [[ $TASK_NAME == "tcr_report" ]]
+    then
+      TASK_NAME_PASCAL="TCRReport"
+    else
+      TASK_NAME_PASCAL=`to-pascal-case $TASK_NAME`
+    fi
+    TASK_MODULE_NAME="Eris::Statements::$TASK_NAME_PASCAL"
+    EXEC_TEXT="load './lib/tasks/$TASK_NAME.rb';\
+    task=$TASK_MODULE_NAME::Task.new(date: \"$TASK_DATE\");\
+    task.run"
+    bundle exec pry --exec "$EXEC_TEXT"
+  fi
+}
+function ez-corefiles() {
+    TASK_NAME="seg_report"
+    TASK_NAME_PASCAL="SegReport"
+    TASK_DATE="2022-01-31"
+    ACCOUNT_ID="foo"
+    TASK_MODULE_NAME="Eris::CoreFiles::$TASK_NAME_PASCAL"
+    EXEC_TEXT="load './lib/clearing/tasks/$TASK_NAME.rb';\
+    task=$TASK_MODULE_NAME.new(date: \"$TASK_DATE\", account_id: \"$ACCOUNT_ID\");\
+    task.run"
+    bundle exec pry --exec "$EXEC_TEXT"
+}
+
+function retrieve-reported-transactions() {
+  EXEC_TEXT="load './lib/tasks/retrieve_reported_transactions.rb';\
+  task=Eris::Bmo::RetrieveReportedTransactions::Task.new;\
+  task.run"
+  bundle exec pry --exec "$EXEC_TEXT"
+}
+
+## make this more into a function later i guess
+function nomad-stuff() {
+  export NOMAD_ADDR=http://tst-va-nomad-a1:4646
+  nomad status
+  nomad job status statementgenerator
+  nomad alloc logs 34c82290
+  nomad alloc logs -f 34c82290
+  nomad alloc logs 34c82290 | grep Ping 
+  nomad alloc logs 34c82290 | grep 1604069712
+  nomad status
+  export NOMAD_ADDR=http://tst-va-nomad-a1:4646
+  nomad status
+  nomad job status tradeapi
+  nomad alloc logs a53d07a6
+  nomad alloc logs a53d07a6 | grep -v INFO
+  nomad alloc logs -f a53d07a6
+  nomad alloc logs -f a53d07a6 | grep WARN
+}
+
+#
+#
+#  various 'book-marked' pages for command line access
+#
+#
+
+function email() {
+  browser-shortcut "$EMAIL_LINK"
+}
+
+function calendar() {
+  browser-shortcut "$CALENDAR_LINK"
+}
+
+function standup() {
+  browser-shortcut "$STANDUP_MEETING_LINK"
+}
+
+function standup-notes() {
+  browser-shortcut "$STANDUP_NOTES_LINK"
+}
+
+function my-library() {
+  browser-shortcut "$AMAZON_LIB_LINK"
+}
+
+function tree-fiddy() {
+  browser-shortcut "$TREE_FIDDY"
+}
+
+function jumpcloud() {
+  browser-shortcut "$JUMPCLOUD"
+}
+
+function datadog-prod() {
+  browser-shortcut "$DATADOG_PROD"  
+}
+function datadog-nrl() {
+  browser-shortcut "$DATADOG_NRL"  
+}
+function datadog-test() {
+  browser-shortcut "$DATADOG_TEST"  
+}
+function datadog-dev() {
+  browser-shortcut "$DATADOG_DEV"  
+}
+function jenkins() {
+  if [[ -z "$1" ]]
+  then
+    browser-shortcut "$JENKINS_LINK"
+  else
+    if [[ $1 == "main" || $1 == "tcs" ]]
+    then
+      browser-shortcut "$JENKINS_LINK/job/eris_tcs"
+    else
+      browser-shortcut "$JENKINS_LINK/job/$1"
+    fi
+  fi
+}
+
+function github() {
+
+  BRANCH_NAME=
+  PROJECT_NAME=
+  USE_CURRENT="no"
+  while [ "$1" != "" ]
+  do
+    case $1 in
+      -b | --branch)
+      BRANCH_NAME="$2"
+      shift
+      shift
+      ;;
+      -p | --project)
+      PROJECT_NAME="$2"
+      shift
+      shift
+      ;;
+      -c | --current)
+      USE_CURRENT="yes"
+      shift
+      ;;
+    esac
+  done
+
+  if [[ $USE_CURRENT ]]
+  then
+    CURRENT_DIR=`pwd`
+    if [[ "$CURRENT_DIR" == *"ClearingSystem"* ]]
+    then
+      PROJECT_NAME="ClearingSystem"
+    elif [[ "$CURRENT_DIR" == *"ClearingAdminUI"* ]]
+    then
+      PROJECT_NAME="ClearingAdminUI"
+    elif [[ "$CURRENT_DIR" == *"ClearingPortal"* ]]
+    then
+      PROJECT_NAME="ClearingPortal"
+    elif [[ "$CURRENT_DIR" == *"StatementGenerator"* ]]
+    then
+      PROJECT_NAME="StatementGenerator"
+    elif [[ "$CURRENT_DIR" == *"Common.rb"* ]]
+    then
+      PROJECT_NAME="Common.rb"
+    else
+      echo "Cannot decipher project name from current path"
+      PROJECT_NAME=
+    fi
+    BRANCH_NAME=`git branch --show-current`
+  fi
+
+  if [[ $BRANCH_NAME == "master" ]]
+  then
+    BRANCH_NAME=
+  fi
+
+  if [[ $PROJECT_NAME == "" ]]
+  then
+    echo "No args"
+    browser-shortcut "$GITHUB_LINK"
+  else
+    if [[ $BRANCH_NAME ]]
+    then
+      browser-shortcut "$GITHUB_LINK/$PROJECT_NAME/tree/$BRANCH_NAME"
+    else
+      browser-shortcut "$GITHUB_LINK/$PROJECT_NAME"
+    fi
+  fi
+}
+alias gh="github"
+
+function local-clearing-admin() {
+  browser-shortcut "http://localhost:3001"
+}
+function local-clearing-portal() {
+  if [[ -z "$1" ]]
+  then
+    browser-shortcut "http://localhost:3002"
+  else
+    browser-shortcut "http://localhost:3002/$1"
+  fi
+}
+
+function jira() {
+  if [[ -z $1 ]]
+  then
+    echo "No args"
+    browser-shortcut "$JIRA_LINK"
+  else
+    browser-shortcut "$JIRA_LINK/browse/CO-$1"
+  fi
+}
+
+function margin-examples() {
+  browser-shortcut "$MARGIN_EXAMPLES_LINK"
+}
+function margin-discussion() {
+  browser-shortcut "https://docs.google.com/document/d/1Ty28w8uFSDIqMRi5Kag2A65IvIemex-yffbU97EEMxg/edit#heading=h.jvoas7qjv6nd"
+}
+
+function sprint() {
+  if [[ -z $1 ]]
+  then
+    browser-shortcut "$SPRINT_LINK"
+  else
+    browser-shortcut "$SPRINT_LINK&search=$1"
+  fi
+}
+
+function release-sched() {
+  browser-shortcut "$RELEASE_SCHED_LINK"
+}
+
+## work in progress
+OPEN_ISSUES_FILE="$ISSUES_DIR/open-issues.txt" 
+function open-issues() {
+  cat $OPEN_ISSUES_FILE
+}
+
+function current-issue() {
+  jira `open-issues`
+}
+
+function find-replace() {
+  if [[ -z $1 ]]
+  then
+    echo "Need a find"
+  elif [[ -z $2 ]]
+  then
+    echo "Need a replace"
+  else
+    grep -RiIl "$1" | xargs sed -i "s/$1/$2/g"
+  fi
+}
+
+function mono-repo() {
+
+  REPO_NAME=""
+  BUG_OR_FEATURE="f"
+  BRANCH_DESC=""
+  TICKET_NUMBER=""
+  MASTER="no"
+  while [[ $1 != "" ]]
+  do
+    case $1 in
+      -r | --repo | --repo-name)
+      REPO_NAME="$2"
+      shift
+      shift
+      ;;
+      -b | --bug)
+      BUG_OR_FEATURE="b"
+      shift
+      ;;
+      -f | --feature)
+      BUG_OR_FEATURE="f"
+      shift
+      ;;
+      -d | --description | --desc)
+      BRANCH_DESC="$2"
+      shift
+      shift
+      ;;
+      -t | --ticket | --jira)
+      TICKET_NUMBER="$2"
+      shift
+      shift
+      ;;
+      -m | --master)
+      MASTER="yes"
+      shift
+      ;;
+      *)
+      shift
+      ;;
+    esac
+  done
+
+  if [[ -z "$REPO_NAME" ]]
+  then
+    echo "need something to call this repo (-r or --repo or --repo-name)"
+  elif [[ $MASTER == "no" && -z "$TICKET_NUMBER" ]]
+  then
+    echo "need a ticket/jira number (-t or --ticket or --jira)"
+  else
+    cd $PROJECTS_DIR
+    git clone "$MONOREPO_LINK" "$REPO_NAME"
+    cd "$REPO_NAME"
+    if [[ -z "$BRANCH_DESC" ]]
+    then
+      BRANCH_DESC="$REPO_NAME"
+    fi
+    if [[ $MASTER != "yes" ]]
+    then
+      git checkout -b "$BUG_OR_FEATURE/CO$TICKET_NUMBER/$BRANCH_DESC"
+    fi
+  fi
+}
+
+function projects () {
+  if [ -z $1 ]
+  then
+    cd "$PROJECTS_DIR"
+  else
+    cd "$PROJECTS_DIR/$1"
+  fi
+}
+function personal-projects() {
+  cd "$PERSONAL_PROJECTS_DIR"
+}
+
+function run-core-files() {
+
+  INSTALL="no"
+  TEST_CORE_FILE="ClearingAccountStatic.csv"
+  TEST_CORE_FILE="$TEST_CORE_FILE_DIR/$TEST_CORE_FILE"
+
+  while [[ $1 != "" ]]
+  do
+    case $1 in
+      -i | --install)
+      INSTALL="yes"
+      shift
+      ;;
+    esac
+  done
+
+  if [[ -f "$TEST_CORE_FILE" ]]
+  then
+    rm "$TEST_CORE_FILE"
+  fi
+
+  cd "$PERSONAL_PROJECTS_DIR/CoreFile"
+  if [[ $INSTALL == "yes" ]]
+  then
+    bundle install
+  fi
+  bex test.rb
+}
+
+function parse-git-branch() {
+  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+}
+export PS1="\[\033[32m\]\w\[\033[33m\]\$(parse-git-branch)\[\033[00m\] $ "
+
+function mongo-tst() {
+  mongo --host tst-va-mongodb-a1:27017 \
+  --username zack.botkin \
+  --password "Xevesae0ail4JakoozaeGie0s" \
+  --authenticationDatabase "admin"
+}
+function mongo-nrl() {
+  mongo --host nrl-va-mongodb-a1.erisx:27017 \
+  --username zack.botkin \
+  --password "Ready4goReady4go!" \
+  --authenticationDatabase "admin"
+}
+
+function evars() {
+
+  SHOW_CREDS="no"
+  SHOW_JWT="no"
+  SHOW_MONGO_STUFF="no"
+  SHOW_POSTGRES_STUFF="no"
+  SHOW_RMQ_STUFF="no"
+  SHOW_STATEMENT_STUFF="no"
+
+  if [[ -z "$1" ]]
+  then
+    SHOW_CREDS="yes"
+    SHOW_MONGO_STUFF="yes"
+    SHOW_POSTGRES_STUFF="yes"
+    SHOW_RMQ_STUFF="yes"
+    SHOW_STATEMENT_STUFF="yes"
+  else
+    while [[ "$1" != "" ]]
+    do
+      case $1 in
+        --all)
+        SHOW_CREDS="yes"
+        SHOW_MONGO_STUFF="yes"
+        SHOW_RMQ_STUFF="yes"
+        SHOW_STATEMENT_STUFF="yes"
+        shift
+        ;;
+        -a | -c | --creds | --auth)
+        SHOW_CREDS="yes"
+        shift
+        ;;
+        -j | --jwt)
+        SHOW_JWT="yes"
+        shift
+        ;;
+        -m | --mongo | --db)
+        SHOW_MONGO_STUFF="yes"
+        shift
+        ;;
+        -p | --postgres)
+        SHOW_POSTGRES_STUFF="yes"
+        shift
+        ;;
+        -r | --rmq)
+        SHOW_RMQ_STUFF="yes"
+        shift
+        ;;
+        -s | --statement | --statements | --ftp)
+        SHOW_STATEMENT_STUFF="yes"
+        shift
+        ;;
+      esac
+    done
+  fi
+
+  if [[ $SHOW_JWT == "yes" && $SHOW_CREDS == "no" ]]
+  then
+    echo "----- JWT"
+    echo "JWT_ISSUER:                     $JWT_ISSUER"
+    echo "JWT_PUB_KEY:                    $JWT_PUB_KEY"
+  fi
+  if [[ $SHOW_CREDS == "yes" ]]
+  then
+    echo "----- CREDS"
+    echo "JWT_ISSUER:                     $JWT_ISSUER"
+    echo "AUTH0_ADMIN_UI_AUD:             $AUTH0_ADMIN_UI_AUD"
+    echo "AUTH0_EMP_AUD:                  $AUTH0_EMP_AUD"
+    echo "AUTH0_API_AUD:                  $AUTH0_API_AUD"
+    echo "JWT_PUB_KEY:                    $JWT_PUB_KEY"
+  fi
+  if [[ $SHOW_MONGO_STUFF == "yes" ]]
+  then
+    echo "----- Mongo"
+    echo "MONGO_AUTH_SOURCE:              $MONGO_AUTH_SOURCE"
+    echo "MONGO_DB_NAME:                  $MONGO_DB_NAME"
+    echo "MONGO_HOST:                     $MONGO_HOST"
+    echo "MONGO_PASSWORD:                 $MONGO_PASSWORD"
+    echo "MONGO_USERNAME:                 $MONGO_USERNAME"
+  fi
+  if [[ $SHOW_POSTGRES_STUFF == "yes" ]]
+  then
+    echo "----- Postgres"
+    echo "POSTGRES_USER                   $POSTGRES_USER"
+    echo "POSTGRES_PASSWORD               $POSTGRES_PASSWORD"
+    echo "POSTGRES_HOST                   $POSTGRES_HOST"
+    echo "POSTGRES_DB                     $POSTGRES_DB"
+  fi
+  if [[ $SHOW_RMQ_STUFF == "yes" ]]
+  then
+    echo "----- RMQ"
+    echo "RABBIT_HOST:                    $RABBIT_HOST"
+  fi
+  if [[ $SHOW_STATEMENT_STUFF == "yes" ]]
+  then
+    echo "----- Statements and FTP"
+    echo "ERISX_CORE_SFTP_DETAILS:        $ERISX_CORE_SFTP_DETAILS"
+    echo "MEMBER_STATEMENT_SFTP_BASE_DIR: $MEMBER_STATEMENT_SFTP_BASE_DIR"
+    echo "SFTP_DETAILS:                   $SFTP_DETAILS"
+  fi
+}
+
+function wallet() {
+  $WALLET_DIR/electron-cash --testnet
+}
+
+function set-px-engine() {
+  REPO=""
+  while [[ $1 != "" ]]
+  do
+    case $1 in
+      -r | --repo)
+      REPO="$2"
+      shift
+      shift
+      ;;
+    esac
+  done
+  FULL_DIR="$PROJECTS_DIR/$REPO"
+  if [[ -d $FULL_DIR ]]
+  then
+    export PX_ENGINE_HOME="$FULL_DIR/Dockerfiles/asdf-builder"
+    echo "PX_ENGINE_HOME: $PX_ENGINE_HOME"
+  else
+    echo "directory $FULL_DIR does not exist"
+  fi
+}
+
+function bitgo-access-token() {
+  export BITGO_ACCESS_TOKEN="v2x9bf3cc9684b0d8817c9b64a2ce06e75f8a28f5ed2e9d55e294db2ff34a1dfce2"
+}
+
+function postgres-entry() {
+  psql -h "tst-va-risk-appdb.cefqb8wd0gr6.us-east-1.rds.amazonaws.com" -p 5432 -U "zack.botkin" -d risk
+} 
+
+function api-server() {
+  DISABLE_RISK_POSTGRES="false" \
+  POSTGRES_USER="zack.botkin" \
+  POSTGRES_PASSWORD="Ready4goReady4go!" \
+  POSTGRES_HOST="tst-va-risk-appdb.cefqb8wd0gr6.us-east-1.rds.amazonaws.com" \
+  POSTGRES_DB="risk" \
+  ./bin/api_server.rb
+}
+function query-server() {
+  DISABLE_RISK_POSTGRES="false" \
+  POSTGRES_USER="zack.botkin" \
+  POSTGRES_PASSWORD="Ready4goReady4go!" \
+  POSTGRES_HOST="tst-va-risk-appdb.cefqb8wd0gr6.us-east-1.rds.amazonaws.com" \
+  POSTGRES_DB="risk" \
+  ./bin/query_server.rb
+}
+function clearing-sysstem() {
+  DISABLE_RISK_POSTGRES="false" \
+  POSTGRES_USER="zack.botkin" \
+  POSTGRES_PASSWORD="Ready4goReady4go!" \
+  #POSTGRES_HOST="tst-va-risk-appdb.cefqb8wd0gr6.us-east-1.rds.amazonaws.com" \
+  POSTGRES_HOST="tst-oh-risk-appdb.cefqb8wd0gr6.us-east-1.rds.amazonaws.com" \
+  POSTGRES_DB="risk" \
+  ./bin/clearing_system.rb
+}
+
+function contract-delivery() {
+  ./lib/clearing/tasks/contract_delivery.rb \
+    --product-code "$MOCK_PRODUCT_CODE" \
+    --contract-code "$MOCK_CONTRACT_CODE"
+}
+
+function yubi() {
+  yubioath-desktop
+}
+
+function docker-nuclear-option () {
+  ./tcs-runner.sh stop
+  rm -rf /tmp/.yarn
+  rm -rf ~/.cache/docker/bundle
+  rm -rf ~/.cache/yarn
+  rm -rf ~/.cache/gradle
+  rm -rf ~/.mongo_tcs_db
+  rm -rf ~/.postgres_db
+  docker stop $(docker ps -q)
+  docker system prune --all --volumes
+  docker network prune
+  make clean
+  ./tcs-runner.sh -s start
+}
+
+function tail-docker-logs() {
+  docker-compose logs -f clearingadminui
+}
+function gitterdone() {
+  git submodule update --init --recursive
+  make clean && make
+}
+
+AGENCY_KEYS_PATH="/home/zack.botkin/agency-testing/superuserA_funding_key.json"
+function hugo-script() {
+  python3 erisxIntermediariesAPI.py \
+  --input 'foo' \
+  --keys-path "$AGENCY_KEYS_PATH" \
+  --secret-name "api-secret" \
+  --key-name "api-key" \
+  --env 'local'
+}
+
+. $HOME/.asdf/asdf.sh
+. $HOME/.asdf/completions/asdf.bash
