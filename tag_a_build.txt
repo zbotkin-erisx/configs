@@ -1,0 +1,26 @@
+tag a build
+
+- in jenkins classic view
+- "branches"
+- add a patch on 64
+- find the branch name (rel-...)
+- build with parameters
+- uncheck running tests
+- release type minor or patch
+- deply env none
+- build
+
+- get the docker info from tcs-ci-build
+
+- nomad
+  -- update vars/docker_tags.yaml
+- get approval
+- tcs infra, need review
+
+- create io ticket
+- jira -> create --> project IO
+  -- deploy tcs 0.64.x to NRL
+  -- desc pull request + release notes
+
+- https://erisdigital.atlassian.net/wiki/spaces/TCS/overview?homepageId=543228038
+  -- bookmark this dude
